@@ -1,4 +1,0 @@
-accession,title,source,role,platform,n_samples,has_nf2,has_grade,has_recurrence,notes,download_url
-GSE180061,Nassiri et al. 2021 — DNA methylation profiling and multi-omics of 185 meningiomas,Nassiri 2021 Nature; cBioPortal: mng_utoronto_2021,discovery,Illumina Infinium HumanMethylation450 + bulk RNA-seq + WES + snRNA-seq,185,True,True,True,EGAS00001004982 (WES/mRNA/snRNA) controlled access; processed data via cBioPortal or GEO idat (GSE180061).,
-GSE212666,Choudhury/Bi lab Cancer Cell 2023 — 565 meningiomas (Merlin-intact / immune-enriched / hypermitotic),Bi-lab Cancer Cell 2023,discovery,Illumina EPIC methylation + RNA-seq + proteomics + scRNA-seq,565,True,True,False,Open GEO accession. Subgroup labels are the primary 3-tier classification.,
-GSE136661,Meningioma expression GEO candidate 1,GEO,replication_candidate,GPL570 [HG-U133_Plus_2],0,False,False,False,Fallback synthetic replication cohort used if GEO download unavailable.,
