@@ -1,0 +1,30 @@
+# ====== LINE ENDINGS (cross-platform reproducibility) ======
+# Normalize text files to LF on commit; checkout uses native on Windows, LF on Unix
+* text=auto eol=lf
+
+# ====== EXPLICIT BINARY (never diff / never merge) ======
+*.pkl    binary
+*.csv    text diff=csv
+*.tsv    text
+*.xlsx   binary
+*.xls    binary
+*.gz     binary
+*.zip    binary
+*.pdf    binary
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.svg    text
+*.parquet binary
+
+# ====== CODE ======
+*.py     text eol=lf diff=python
+*.R      text eol=lf
+*.Rmd    text eol=lf
+*.sh     text eol=lf
+*.toml   text eol=lf
+*.yaml   text eol=lf
+*.yml    text eol=lf
+*.json   text eol=lf
+*.md     text eol=lf
+*.cff    text eol=lf

@@ -1,0 +1,186 @@
+sample_id,nassiri_group,bi_group,nf2_status,who_grade,recurrence_event,recurrence_months,age_at_surgery,sex
+nassiri_synthetic_0000,NF2-inactivated canonical,Merlin-intact,Intact,I,False,72.47063494798171,73.0,M
+nassiri_synthetic_0001,Hypermetabolic,Hypermitotic,Intact,II,False,65.10863254622464,41.0,F
+nassiri_synthetic_0002,Hypermetabolic,Hypermitotic,Intact,III,False,95.11295722357326,56.0,M
+nassiri_synthetic_0003,NF2-inactivated canonical,Merlin-intact,Intact,I,True,77.76867657293504,37.0,F
+nassiri_synthetic_0004,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,II,False,48.0949971373516,36.0,F
+nassiri_synthetic_0005,Hypermetabolic,Hypermitotic,Intact,III,False,53.76221926649863,64.0,M
+nassiri_synthetic_0006,Hypermetabolic,Hypermitotic,Intact,III,False,11.758099775366746,73.0,F
+nassiri_synthetic_0007,NF2-inactivated canonical,Immune-enriched,Mutant/Loss,II,True,81.41747549031527,82.0,M
+nassiri_synthetic_0008,Hypermetabolic,Hypermitotic,Mutant/Loss,II,False,59.87171084254201,68.0,M
+nassiri_synthetic_0009,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,II,True,66.21884144204215,73.0,F
+nassiri_synthetic_0010,NF2-inactivated canonical,Immune-enriched,Mutant/Loss,I,False,45.477517420726166,82.0,M
+nassiri_synthetic_0011,Hypermetabolic,Merlin-intact,Intact,I,False,25.585646077181085,35.0,F
+nassiri_synthetic_0012,Hypermetabolic,Hypermitotic,Mutant/Loss,III,True,38.11531182861621,63.0,F
+nassiri_synthetic_0013,NF2-inactivated canonical,Hypermitotic,Mutant/Loss,I,False,61.50490464217918,55.0,F
+nassiri_synthetic_0014,Immunogenic,Hypermitotic,Intact,I,False,81.17165058465137,39.0,M
+nassiri_synthetic_0015,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,II,False,57.4584768351393,35.0,F
+nassiri_synthetic_0016,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,I,True,45.61305669177865,49.0,M
+nassiri_synthetic_0017,NF2-inactivated canonical,Hypermitotic,Intact,I,False,113.92007493147081,59.0,F
+nassiri_synthetic_0018,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,II,False,72.82225078795877,39.0,F
+nassiri_synthetic_0019,NF2-inactivated canonical,Hypermitotic,Mutant/Loss,II,True,70.60475002073204,37.0,M
+nassiri_synthetic_0020,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,II,True,7.133168967122312,62.0,F
+nassiri_synthetic_0021,NF2-inactivated canonical,Hypermitotic,Mutant/Loss,I,True,93.89612506292298,29.0,F
+nassiri_synthetic_0022,NF2-inactivated canonical,Hypermitotic,Mutant/Loss,I,False,73.56364805819481,47.0,M
+nassiri_synthetic_0023,Immunogenic,Immune-enriched,Mutant/Loss,I,False,59.79071945789445,33.0,M
+nassiri_synthetic_0024,Hypermetabolic,Hypermitotic,Intact,II,True,31.338900841131778,56.0,M
+nassiri_synthetic_0025,Hypermetabolic,Immune-enriched,Mutant/Loss,III,False,54.83127945690713,56.0,F
+nassiri_synthetic_0026,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,I,True,63.48474124718135,49.0,M
+nassiri_synthetic_0027,Hypermetabolic,Hypermitotic,Intact,III,True,27.19207493617612,50.0,M
+nassiri_synthetic_0028,NF2-inactivated canonical,Merlin-intact,Intact,III,False,131.31647787453664,31.0,F
+nassiri_synthetic_0029,Immunogenic,Hypermitotic,Intact,III,False,19.01141346129464,39.0,F
+nassiri_synthetic_0030,Hypermetabolic,Immune-enriched,Intact,II,False,93.41133860950815,31.0,F
+nassiri_synthetic_0031,NF2-inactivated canonical,Immune-enriched,Mutant/Loss,III,True,9.121717225911075,48.0,F
+nassiri_synthetic_0032,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,II,False,66.84421560590867,77.0,M
+nassiri_synthetic_0033,NF2-inactivated canonical,Hypermitotic,Mutant/Loss,II,False,35.46791798042911,33.0,M
+nassiri_synthetic_0034,NF2-inactivated canonical,Merlin-intact,Intact,II,False,42.276883003556975,78.0,F
+nassiri_synthetic_0035,Immunogenic,Merlin-intact,Intact,II,False,21.0947301521253,35.0,F
+nassiri_synthetic_0036,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,I,False,38.76863615191614,33.0,F
+nassiri_synthetic_0037,Immunogenic,Immune-enriched,Mutant/Loss,II,False,11.047219976970872,73.0,M
+nassiri_synthetic_0038,Hypermetabolic,Hypermitotic,Intact,III,True,84.03532712636037,31.0,F
+nassiri_synthetic_0039,NF2-inactivated canonical,Hypermitotic,Mutant/Loss,II,False,40.66222662087518,43.0,M
+nassiri_synthetic_0040,Hypermetabolic,Merlin-intact,Intact,I,False,62.08429693580733,68.0,F
+nassiri_synthetic_0041,Hypermetabolic,Hypermitotic,Intact,III,False,19.768354187273967,76.0,F
+nassiri_synthetic_0042,Hypermetabolic,Hypermitotic,Mutant/Loss,I,False,100.46772130165986,73.0,F
+nassiri_synthetic_0043,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,II,False,46.04668072981376,78.0,F
+nassiri_synthetic_0044,Immunogenic,Immune-enriched,Intact,II,False,8.982043311515353,50.0,M
+nassiri_synthetic_0045,Immunogenic,Immune-enriched,Intact,I,False,8.752333797203159,76.0,F
+nassiri_synthetic_0046,Hypermetabolic,Hypermitotic,Mutant/Loss,I,False,76.87187848163738,34.0,F
+nassiri_synthetic_0047,Immunogenic,Immune-enriched,Intact,I,False,36.60453135458346,72.0,F
+nassiri_synthetic_0048,Immunogenic,Immune-enriched,Intact,I,False,38.500424587040854,46.0,F
+nassiri_synthetic_0049,Immunogenic,Immune-enriched,Intact,I,False,83.46268651442215,64.0,F
+nassiri_synthetic_0050,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,I,False,83.02033643365547,79.0,F
+nassiri_synthetic_0051,NF2-inactivated canonical,Hypermitotic,Mutant/Loss,II,False,41.62035811806414,75.0,M
+nassiri_synthetic_0052,Hypermetabolic,Merlin-intact,Intact,II,False,78.70959012458358,52.0,M
+nassiri_synthetic_0053,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,III,False,32.23157753053371,40.0,F
+nassiri_synthetic_0054,Immunogenic,Immune-enriched,Intact,I,False,98.69377945652113,43.0,F
+nassiri_synthetic_0055,Immunogenic,Immune-enriched,Mutant/Loss,I,False,18.636189424333622,28.0,M
+nassiri_synthetic_0056,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,I,False,18.386032584366394,28.0,F
+nassiri_synthetic_0057,NF2-inactivated canonical,Hypermitotic,Mutant/Loss,I,False,99.68137358046692,60.0,F
+nassiri_synthetic_0058,Immunogenic,Immune-enriched,Intact,I,False,31.75899780515203,74.0,F
+nassiri_synthetic_0059,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,I,False,44.65694687895348,38.0,M
+nassiri_synthetic_0060,Immunogenic,Immune-enriched,Intact,I,False,51.81171888367708,67.0,M
+nassiri_synthetic_0061,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,I,True,25.78597003492216,69.0,M
+nassiri_synthetic_0062,Immunogenic,Immune-enriched,Mutant/Loss,I,False,39.06910538127815,78.0,M
+nassiri_synthetic_0063,Immunogenic,Immune-enriched,Intact,II,False,87.66666601078178,52.0,F
+nassiri_synthetic_0064,Hypermetabolic,Immune-enriched,Intact,I,True,17.30409952086844,57.0,F
+nassiri_synthetic_0065,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,II,False,14.844142271114318,41.0,F
+nassiri_synthetic_0066,Immunogenic,Immune-enriched,Intact,I,False,61.88004281249123,55.0,F
+nassiri_synthetic_0067,Hypermetabolic,Merlin-intact,Intact,II,False,36.00735784504017,83.0,M
+nassiri_synthetic_0068,Hypermetabolic,Hypermitotic,Mutant/Loss,III,False,60.53861802183286,64.0,F
+nassiri_synthetic_0069,NF2-inactivated canonical,Hypermitotic,Mutant/Loss,II,False,31.01977025262465,65.0,M
+nassiri_synthetic_0070,Immunogenic,Hypermitotic,Intact,II,False,80.80925735737891,67.0,F
+nassiri_synthetic_0071,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,II,True,34.51327769004743,49.0,M
+nassiri_synthetic_0072,Immunogenic,Immune-enriched,Intact,III,True,18.265512181919583,46.0,F
+nassiri_synthetic_0073,Hypermetabolic,Hypermitotic,Mutant/Loss,II,False,36.76711161115835,28.0,M
+nassiri_synthetic_0074,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,II,False,24.43354463535396,71.0,F
+nassiri_synthetic_0075,Hypermetabolic,Merlin-intact,Mutant/Loss,II,False,81.78006403325409,80.0,F
+nassiri_synthetic_0076,Hypermetabolic,Hypermitotic,Mutant/Loss,III,False,41.96931782632513,64.0,F
+nassiri_synthetic_0077,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,I,False,16.14109385715287,42.0,M
+nassiri_synthetic_0078,Immunogenic,Immune-enriched,Intact,I,True,29.51454524227223,75.0,M
+nassiri_synthetic_0079,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,II,False,85.53786954537449,33.0,F
+nassiri_synthetic_0080,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,I,False,13.447977168054377,58.0,M
+nassiri_synthetic_0081,Hypermetabolic,Immune-enriched,Intact,III,True,66.85610012385044,43.0,M
+nassiri_synthetic_0082,Hypermetabolic,Immune-enriched,Intact,II,False,17.320138498654565,34.0,F
+nassiri_synthetic_0083,Immunogenic,Immune-enriched,Intact,II,False,69.75521321086447,31.0,F
+nassiri_synthetic_0084,Immunogenic,Immune-enriched,Intact,I,False,46.4947775823696,28.0,F
+nassiri_synthetic_0085,Hypermetabolic,Immune-enriched,Intact,III,False,74.85054094741702,80.0,F
+nassiri_synthetic_0086,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,II,True,31.55092609446418,28.0,F
+nassiri_synthetic_0087,Hypermetabolic,Merlin-intact,Mutant/Loss,III,False,34.06376508742952,83.0,F
+nassiri_synthetic_0088,Hypermetabolic,Merlin-intact,Intact,II,False,17.745002254896487,76.0,M
+nassiri_synthetic_0089,Hypermetabolic,Merlin-intact,Intact,I,False,48.59103904646547,66.0,M
+nassiri_synthetic_0090,Immunogenic,Hypermitotic,Intact,I,False,106.45784242087774,56.0,F
+nassiri_synthetic_0091,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,II,False,36.284344393850176,81.0,F
+nassiri_synthetic_0092,Hypermetabolic,Hypermitotic,Intact,II,False,6.922624822441928,82.0,F
+nassiri_synthetic_0093,Immunogenic,Merlin-intact,Intact,I,True,94.50237005111576,37.0,F
+nassiri_synthetic_0094,Hypermetabolic,Hypermitotic,Intact,II,False,18.077685833580777,72.0,F
+nassiri_synthetic_0095,Hypermetabolic,Hypermitotic,Intact,III,True,6.1650380165601915,64.0,F
+nassiri_synthetic_0096,NF2-inactivated canonical,Merlin-intact,Intact,III,False,134.8023794347448,62.0,F
+nassiri_synthetic_0097,NF2-inactivated canonical,Immune-enriched,Mutant/Loss,II,True,84.80228546153842,55.0,F
+nassiri_synthetic_0098,Immunogenic,Immune-enriched,Mutant/Loss,I,False,85.49376202485188,32.0,M
+nassiri_synthetic_0099,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,I,False,45.621753755076355,50.0,M
+nassiri_synthetic_0100,Hypermetabolic,Hypermitotic,Intact,II,False,104.89173775943375,44.0,M
+nassiri_synthetic_0101,Immunogenic,Immune-enriched,Intact,I,False,72.08780767747993,76.0,F
+nassiri_synthetic_0102,Hypermetabolic,Immune-enriched,Intact,II,True,21.590407184388354,36.0,M
+nassiri_synthetic_0103,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,I,False,40.77196690109189,51.0,F
+nassiri_synthetic_0104,Hypermetabolic,Hypermitotic,Intact,II,False,95.54216023186555,76.0,F
+nassiri_synthetic_0105,Hypermetabolic,Hypermitotic,Intact,II,False,103.76628106201998,52.0,M
+nassiri_synthetic_0106,NF2-inactivated canonical,Hypermitotic,Mutant/Loss,I,True,73.89140274750856,34.0,M
+nassiri_synthetic_0107,Immunogenic,Hypermitotic,Intact,I,False,82.33641925885733,82.0,F
+nassiri_synthetic_0108,Immunogenic,Immune-enriched,Intact,II,False,51.408045524318446,36.0,F
+nassiri_synthetic_0109,Immunogenic,Immune-enriched,Mutant/Loss,II,False,53.136082271301234,77.0,F
+nassiri_synthetic_0110,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,I,True,58.77826681274421,48.0,M
+nassiri_synthetic_0111,Immunogenic,Immune-enriched,Intact,I,False,18.595429153664185,77.0,F
+nassiri_synthetic_0112,Hypermetabolic,Hypermitotic,Intact,I,True,65.81563789344821,80.0,M
+nassiri_synthetic_0113,Immunogenic,Immune-enriched,Intact,I,False,24.839032652029996,31.0,F
+nassiri_synthetic_0114,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,I,False,39.69796537912907,81.0,M
+nassiri_synthetic_0115,Immunogenic,Immune-enriched,Mutant/Loss,I,True,11.74933255955132,28.0,F
+nassiri_synthetic_0116,Hypermetabolic,Merlin-intact,Intact,III,False,92.05163593336667,59.0,F
+nassiri_synthetic_0117,Immunogenic,Immune-enriched,Intact,II,False,47.53423209211972,34.0,M
+nassiri_synthetic_0118,Hypermetabolic,Merlin-intact,Intact,II,False,74.35036865458751,83.0,F
+nassiri_synthetic_0119,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,III,True,35.553996970290235,32.0,F
+nassiri_synthetic_0120,NF2-inactivated canonical,Merlin-intact,Intact,II,False,93.11170056712652,29.0,M
+nassiri_synthetic_0121,Hypermetabolic,Hypermitotic,Intact,II,False,107.94321104106669,75.0,F
+nassiri_synthetic_0122,NF2-inactivated canonical,Hypermitotic,Mutant/Loss,II,False,86.66201121027134,82.0,M
+nassiri_synthetic_0123,Immunogenic,Immune-enriched,Intact,I,False,6.152034507409116,69.0,F
+nassiri_synthetic_0124,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,III,False,31.669947918857385,64.0,F
+nassiri_synthetic_0125,Hypermetabolic,Merlin-intact,Intact,I,True,74.50666272972467,82.0,M
+nassiri_synthetic_0126,Immunogenic,Immune-enriched,Intact,I,False,32.836121431311675,30.0,F
+nassiri_synthetic_0127,Immunogenic,Immune-enriched,Intact,II,False,64.65563064014,33.0,F
+nassiri_synthetic_0128,Hypermetabolic,Hypermitotic,Intact,III,True,59.025158865832054,28.0,M
+nassiri_synthetic_0129,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,I,False,48.19671938689556,66.0,F
+nassiri_synthetic_0130,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,III,False,80.33085789665175,55.0,M
+nassiri_synthetic_0131,Hypermetabolic,Hypermitotic,Intact,III,True,50.262182970096994,41.0,F
+nassiri_synthetic_0132,Immunogenic,Immune-enriched,Intact,I,True,19.78916495164153,28.0,F
+nassiri_synthetic_0133,Hypermetabolic,Hypermitotic,Mutant/Loss,II,False,100.98262212324842,31.0,F
+nassiri_synthetic_0134,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,III,False,45.56995510583344,75.0,F
+nassiri_synthetic_0135,Hypermetabolic,Hypermitotic,Mutant/Loss,III,True,52.57613301354647,47.0,M
+nassiri_synthetic_0136,Immunogenic,Merlin-intact,Intact,II,False,46.11356691901017,43.0,F
+nassiri_synthetic_0137,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,II,False,51.180165324945115,36.0,F
+nassiri_synthetic_0138,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,II,False,25.84009422640794,54.0,F
+nassiri_synthetic_0139,Hypermetabolic,Hypermitotic,Mutant/Loss,II,False,37.58642946986255,68.0,M
+nassiri_synthetic_0140,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,III,False,46.9578885872208,49.0,M
+nassiri_synthetic_0141,Hypermetabolic,Immune-enriched,Intact,III,True,95.53232331471578,70.0,M
+nassiri_synthetic_0142,Immunogenic,Immune-enriched,Intact,I,True,38.66681070371855,51.0,F
+nassiri_synthetic_0143,Immunogenic,Merlin-intact,Intact,II,False,54.3901594746319,83.0,F
+nassiri_synthetic_0144,Immunogenic,Immune-enriched,Intact,II,False,43.58332023567982,76.0,M
+nassiri_synthetic_0145,Immunogenic,Immune-enriched,Intact,II,True,39.14813890485597,66.0,M
+nassiri_synthetic_0146,Immunogenic,Immune-enriched,Intact,I,False,48.9402189411344,72.0,F
+nassiri_synthetic_0147,Immunogenic,Immune-enriched,Intact,I,False,11.869599296948582,34.0,M
+nassiri_synthetic_0148,NF2-inactivated canonical,Hypermitotic,Mutant/Loss,I,False,75.21260198613594,40.0,F
+nassiri_synthetic_0149,Immunogenic,Merlin-intact,Mutant/Loss,I,False,44.503695024193725,55.0,F
+nassiri_synthetic_0150,Immunogenic,Immune-enriched,Intact,I,False,33.398348166291285,83.0,F
+nassiri_synthetic_0151,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,I,False,112.42357474655037,49.0,F
+nassiri_synthetic_0152,Immunogenic,Immune-enriched,Intact,I,False,35.74279450625013,65.0,F
+nassiri_synthetic_0153,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,III,False,93.32686505647864,29.0,M
+nassiri_synthetic_0154,Hypermetabolic,Hypermitotic,Intact,III,False,54.9379448457569,65.0,M
+nassiri_synthetic_0155,Immunogenic,Hypermitotic,Mutant/Loss,I,False,32.732378770609124,45.0,M
+nassiri_synthetic_0156,Immunogenic,Immune-enriched,Intact,III,True,57.27414771386078,64.0,F
+nassiri_synthetic_0157,NF2-inactivated canonical,Hypermitotic,Mutant/Loss,I,False,40.73465094805425,56.0,F
+nassiri_synthetic_0158,NF2-inactivated canonical,Hypermitotic,Mutant/Loss,I,False,51.16883606978439,75.0,F
+nassiri_synthetic_0159,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,II,False,9.387762750836636,34.0,F
+nassiri_synthetic_0160,Hypermetabolic,Hypermitotic,Intact,III,True,21.307340304090737,53.0,F
+nassiri_synthetic_0161,Immunogenic,Merlin-intact,Intact,III,True,40.093346821166904,78.0,F
+nassiri_synthetic_0162,Immunogenic,Immune-enriched,Intact,I,False,75.58485801047183,45.0,F
+nassiri_synthetic_0163,NF2-inactivated canonical,Hypermitotic,Mutant/Loss,II,False,12.408051822989743,70.0,F
+nassiri_synthetic_0164,NF2-inactivated canonical,Immune-enriched,Mutant/Loss,II,True,69.17906921791341,59.0,F
+nassiri_synthetic_0165,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,II,False,85.21463146721813,80.0,M
+nassiri_synthetic_0166,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,I,False,60.98421344380721,33.0,M
+nassiri_synthetic_0167,NF2-inactivated canonical,Hypermitotic,Mutant/Loss,I,False,35.73131106797519,50.0,F
+nassiri_synthetic_0168,Hypermetabolic,Hypermitotic,Intact,I,False,32.231797305950394,38.0,F
+nassiri_synthetic_0169,NF2-inactivated canonical,Immune-enriched,Mutant/Loss,III,False,40.91724315388758,65.0,F
+nassiri_synthetic_0170,Hypermetabolic,Hypermitotic,Intact,II,False,66.8236506082436,56.0,M
+nassiri_synthetic_0171,Immunogenic,Hypermitotic,Mutant/Loss,I,False,110.82816208496736,48.0,F
+nassiri_synthetic_0172,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,I,False,116.48223479566887,74.0,M
+nassiri_synthetic_0173,NF2-inactivated canonical,Hypermitotic,Intact,III,False,8.447175961955853,75.0,M
+nassiri_synthetic_0174,Immunogenic,Immune-enriched,Intact,II,False,24.855961280456896,45.0,F
+nassiri_synthetic_0175,NF2-inactivated canonical,Immune-enriched,Mutant/Loss,II,False,51.90468249411996,56.0,F
+nassiri_synthetic_0176,Hypermetabolic,Hypermitotic,Intact,III,True,75.54761670502386,68.0,F
+nassiri_synthetic_0177,Hypermetabolic,Hypermitotic,Intact,III,False,28.337546497883363,37.0,F
+nassiri_synthetic_0178,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,II,False,77.95994029245269,52.0,M
+nassiri_synthetic_0179,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,II,False,29.75061594483206,35.0,F
+nassiri_synthetic_0180,Hypermetabolic,Hypermitotic,Intact,II,False,51.89458240042158,31.0,M
+nassiri_synthetic_0181,Immunogenic,Hypermitotic,Intact,II,False,117.96140931685696,36.0,F
+nassiri_synthetic_0182,NF2-inactivated canonical,Merlin-intact,Mutant/Loss,III,True,70.11105073227921,37.0,F
+nassiri_synthetic_0183,NF2-inactivated canonical,Hypermitotic,Intact,III,True,65.79508513659444,72.0,M
+nassiri_synthetic_0184,NF2-inactivated canonical,Hypermitotic,Mutant/Loss,II,False,12.10270317301169,57.0,M

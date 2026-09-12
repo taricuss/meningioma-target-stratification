@@ -1,0 +1,2 @@
+best_method=ridge
+loocv_kappa=0.0277

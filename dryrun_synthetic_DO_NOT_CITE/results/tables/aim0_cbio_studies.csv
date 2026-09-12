@@ -1,0 +1,2 @@
+study_id,name,description,citation,n_samples,n_patients,has_mutation,has_cna,has_mrna,has_methylation
+mng_utoronto_2021,"Meningioma (University of Toronto, Nature 2021)","Meningioma DNA somatic copy number, somatic point mutations, DNA methylation, RNA abundance, protein abundance",Farshad et al. Nature 2021,121,,,,,

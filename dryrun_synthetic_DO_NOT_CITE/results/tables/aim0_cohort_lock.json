@@ -1,0 +1,41 @@
+[
+  {
+    "accession": "GSE180061",
+    "title": "Nassiri et al. 2021 \u2014 DNA methylation profiling and multi-omics of 185 meningiomas",
+    "source": "Nassiri 2021 Nature; cBioPortal: mng_utoronto_2021",
+    "role": "discovery",
+    "platform": "Illumina Infinium HumanMethylation450 + bulk RNA-seq + WES + snRNA-seq",
+    "n_samples": 185,
+    "has_nf2": true,
+    "has_grade": true,
+    "has_recurrence": true,
+    "notes": "EGAS00001004982 (WES/mRNA/snRNA) controlled access; processed data via cBioPortal or GEO idat (GSE180061).",
+    "download_url": null
+  },
+  {
+    "accession": "GSE212666",
+    "title": "Choudhury/Bi lab Cancer Cell 2023 \u2014 565 meningiomas (Merlin-intact / immune-enriched / hypermitotic)",
+    "source": "Bi-lab Cancer Cell 2023",
+    "role": "discovery",
+    "platform": "Illumina EPIC methylation + RNA-seq + proteomics + scRNA-seq",
+    "n_samples": 565,
+    "has_nf2": true,
+    "has_grade": true,
+    "has_recurrence": false,
+    "notes": "Open GEO accession. Subgroup labels are the primary 3-tier classification.",
+    "download_url": null
+  },
+  {
+    "accession": "GSE136661",
+    "title": "Meningioma expression GEO candidate 1",
+    "source": "GEO",
+    "role": "replication_candidate",
+    "platform": "GPL570 [HG-U133_Plus_2]",
+    "n_samples": 0,
+    "has_nf2": false,
+    "has_grade": false,
+    "has_recurrence": false,
+    "notes": "Fallback synthetic replication cohort used if GEO download unavailable.",
+    "download_url": null
+  }
+]

@@ -1,0 +1,2 @@
+cohort,label_a,label_b,n_paired,n_categories,cohens_kappa,p_cohens_kappa,chi2,chi2_df,p_chi2,cramers_v
+nassiri_synthetic,nassiri_group,bi_group,185,6,0.0,,97.75062291816063,25,1.4969051629795034e-10,0.3250789890176143

@@ -1,0 +1,70 @@
+# ====== DATA ======
+data/raw/*
+data/interim/*
+data/processed/*
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+
+# ====== RESULTS ======
+# Reproducible outputs — committed only as release assets or Zenodo deposit
+results/figures/*
+results/tables/*
+logs/*
+!results/figures/.gitkeep
+!results/tables/.gitkeep
+!logs/.gitkeep
+
+# ====== R ENVIRONMENT ======
+# Local R package library (compiled binaries, platform-specific, reproducible via renv/pak)
+r_lib/
+
+# ====== PYTHON ======
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# ====== NOTEBOOK / EDITOR ======
+.ipynb_checkpoints/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ====== ENVIRONMENT ======
+.env
+.venv/
+venv/
+env/
+ENV/
+
+# ====== OS ======
+.DS_Store
+Thumbs.db
+
+# ====== OFFICE LOCK FILES ======
+# Microsoft Office temporary lock files (e.g. ~$file.docx, ~$file.xlsx)
+~$*
+
+# ====== SCRATCH / PROBE WORK — NEVER COMMIT ======
+scratch/
+_tmp_*.py
+_probe_*.py
+_fetch_probe_*.py
+notebooks/
+*.RData
+*.rds
+*.Rhistory
+*.Rapp.history

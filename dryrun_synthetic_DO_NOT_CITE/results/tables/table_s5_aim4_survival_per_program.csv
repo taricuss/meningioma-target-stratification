@@ -1,0 +1,6 @@
+program,n_total,n_events,logrank_p,cox_HR_score_high_vs_low,cox_HR_95CI_low,cox_HR_95CI_high,cox_p,exploratory_only_flag
+HDAC_Panobinostat_Romidepsin,185,44,0.19551529970861778,,,,,True
+Proteasome_Carfilzomib,185,44,0.3380236298062418,,,,,True
+Tubulin_Ixabepilone,185,44,0.3940151141748056,,,,,True
+Translation_Omacetaxine,185,44,0.20101757655123562,,,,,True
+HDAC8_TGFb_EMT_Resistance,185,44,0.9213339386368053,,,,,True

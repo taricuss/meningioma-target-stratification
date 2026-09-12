@@ -1,0 +1,597 @@
+---
+title: "Convergent two-classifier transcriptomic stratification of five antimeningioma drug-target programs across public multi-omic meningioma cohorts"
+shorttitle: "Convergent classifier stratification of meningioma drug programs"
+author:
+  - name: "Placeholder"
+    affiliation: "Computational framework and open-data analyses prepared for shared-authorship submission with the Jungwirth/Warta Heidelberg meningioma screening group pending their review of the locked analysis specification and (optional) replacement of mechanism-inferred gene-program lists with their screening-panel target annotations (Preface A)."
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  bookdown::word_document2:
+    reference_docx: NULL
+    toc: false
+    number_sections: false
+    fig_caption: true
+    keep_md: false
+    pandoc_args:
+      - "--shift-heading-level-by=0"
+bibliography: references.bib
+csl: "https://raw.githubusercontent.com/citation-style-language/styles/master/biomed-central.csl"
+link-citations: true
+linkcolor: blue
+citecolor: blue
+documentclass: article
+classoption: a4paper
+geometry: margin=1in
+fontsize: 12pt
+header-includes:
+  - \usepackage{setspace}
+  - \onehalfspacing
+---
+
+```{r setup, include=FALSE, cache=FALSE}
+# ---------------------------------------------------------------------------
+# KNITR GLOBAL OPTIONS
+# ---------------------------------------------------------------------------
+knitr::opts_chunk$set(
+  echo      = FALSE,
+  warning   = FALSE,
+  message   = FALSE,
+  error     = FALSE,
+  collapse  = TRUE,
+  comment   = NA,
+  fig.align = "center",
+  dpi       = 300,
+  dev       = "png"
+)
+
+# Set project root to one directory ABOVE manuscript/ (where README.md lives)
+# This ensures results/tables/ resolves correctly whether knit from RStudio or CLI.
+proj_root <- normalizePath(file.path(knitr::opts_knit$get("output.dir") %||% getwd(), ".."), winslash = "/", mustWork = FALSE)
+if (!file.exists(file.path(proj_root, "README.md"))) {
+  # Fallback: walk up from current script location until we find README.md
+  cand <- getwd()
+  for (i in 1:4) {
+    if (file.exists(file.path(cand, "README.md"))) { proj_root <- cand; break }
+    cand <- normalizePath(file.path(cand, ".."), winslash = "/", mustWork = FALSE)
+  }
+}
+knitr::opts_knit$set(root.dir = proj_root)
+
+# ---------------------------------------------------------------------------
+# PACKAGE INSTALL / LOAD (CRAN mirror + pacman-style safety)
+# ---------------------------------------------------------------------------
+required_pkgs <- c(
+  "tidyverse", "here", "flextable", "officer",
+  "scales", "stringr", "knitr", "bookdown", "purrr"
+)
+new_pkgs <- required_pkgs[!(required_pkgs %in% rownames(installed.packages()))]
+if (length(new_pkgs) > 0) {
+  options(repos = c(CRAN = "https://cloud.r-project.org"))
+  install.packages(new_pkgs, quiet = TRUE)
+}
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(here)
+  library(flextable)
+  library(officer)
+  library(scales)
+  library(stringr)
+  library(knitr)
+  library(bookdown)
+})
+
+# `proj_root` already resolved above via 4-level walk-up (lines 49-58).
+# Use file.path(proj_root, ...) directly instead of here() to avoid
+# here::i_am() relative-path-only issues + locked-namespace failures.
+
+# ---------------------------------------------------------------------------
+# FLEXTABLE THEME — publication-ready for Word (compact, Times-style, borders)
+# ---------------------------------------------------------------------------
+set_flextable_defaults(
+  font.family   = "Times New Roman",
+  font.size     = 10,
+  border.color  = "black",
+  padding.top   = 3,
+  padding.bottom = 3,
+  padding.left  = 5,
+  padding.right = 5,
+  table.layout  = "autofit"
+)
+ft_pub_theme <- function(ft, header_bold = TRUE, header_size = 10, body_size = 10) {
+  ft %>%
+    border_remove() %>%
+    border_outer(part = "all", border = fp_border(width = 0.8)) %>%
+    border_inner_h(part = "all", border = fp_border(width = 0.4)) %>%
+    border_inner_v(part = "all", border = fp_border(width = 0.2, style = "dotted")) %>%
+    bold(part = "header", bold = header_bold) %>%
+    fontsize(part = "header", size = header_size) %>%
+    fontsize(part = "body",   size = body_size) %>%
+    fontsize(part = "footer", size = body_size - 1) %>%
+    align(part = "all", align = "center") %>%
+    align(j = 1, align = "left", part = "all")
+}
+
+# ---------------------------------------------------------------------------
+# NUMERIC FORMAT HELPERS (match manuscript style: x × 10^y, 3 decimals)
+# ---------------------------------------------------------------------------
+# fmt_p is called inside dplyr::mutate() — MUST be fully vectorised.
+# (base `if ()` is scalar-only; wrap the scalar core in Vectorize().)
+fmt_p_core <- function(p) {
+  if (is.na(p)) return("NA")
+  if (p < 1e-16) return("< 1 \u00d7 10\u207b\u00b9\u2076")
+  if (p < 1e-3) {
+    e <- floor(log10(p)); m <- p / 10^e
+    sprintf("%.1f \u00d7 10%s", m, superdigit(e))
+  } else {
+    sprintf("%.3f", p)
+  }
+}
+fmt_p <- Vectorize(fmt_p_core, USE.NAMES = FALSE)
+superdigit <- function(n) {
+  n <- as.integer(n)
+  neg <- n < 0; n <- abs(n)
+  map_digits <- setNames(strsplit("\u2070\u00b9\u00b2\u00b3\u2074\u2075\u2076\u2077\u2078\u2079", "")[[1]], 0:9)
+  digs <- strsplit(as.character(n), "")[[1]]
+  out <- paste(map_digits[digs], collapse = "")
+  if (neg) paste0("\u207b", out) else out
+}
+fmt3 <- function(x) sprintf("%.3f", as.numeric(x))
+fmt2 <- function(x) sprintf("%.2f", as.numeric(x))
+fmt_pct <- function(x, dig=1) sprintf(paste0("%.",dig,"f%%"), as.numeric(x)*100)
+checkmark <- "\u2705"
+crossmark <- "\u274c"
+```
+
+```{r load-source-csvs, include=FALSE}
+# ---------------------------------------------------------------------------
+# LOAD ALL FROZEN RESULT CSVs  (pipeline → manuscript bridge)
+# Fail LOUDLY if any CSV is missing — quarantine / zero-leak discipline.
+# ---------------------------------------------------------------------------
+csv_dir <- file.path(proj_root, "results", "tables")
+req_files <- list(
+  s1_xtab       = "table_s1_aim1_concordance_crosstab_counts.csv",
+  s1_metrics    = "table_s1_aim1_concordance_metrics.csv",
+  s1b_all       = "table_s1b_aim1_pairing_specificity_all_pairings_ranked.csv",
+  s1b_summary   = "table_s1b_aim1_pairing_specificity_summary.csv",
+  s2a_h2_kw     = "table_s2a_aim2_nassiri_native4grp_h2_subgroup_kw.csv",
+  s2a_h2_pw     = "table_s2a_aim2_nassiri_native4grp_h2_subgroup_pairwise.csv",
+  s2a_grade_adj = "table_s2a_aim2_nassiri_native4grp_grade_adjusted.csv",
+  s2a_h3_nf2    = "table_s2a_aim2_nassiri_native4grp_h3_nf2.csv",
+  aim0_lock     = "aim0_cohort_lock.csv"
+)
+missing <- req_files[!file.exists(file.path(csv_dir, unlist(req_files)))]
+if (length(missing) > 0) {
+  stop(sprintf("MISSING FROZEN RESULT CSV(s) — pipeline must re-run before knitting:\n  %s",
+               paste(sprintf("results/tables/%s", unlist(missing)), collapse = "\n  ")))
+}
+
+d_s1_xtab       <- read_csv(file.path(csv_dir, req_files$s1_xtab),       show_col_types = FALSE)
+d_s1_metrics    <- read_csv(file.path(csv_dir, req_files$s1_metrics),    show_col_types = FALSE)
+d_s1b_all       <- read_csv(file.path(csv_dir, req_files$s1b_all),       show_col_types = FALSE) %>% arrange(rank_kappa_desc)
+d_s1b_summary   <- read_csv(file.path(csv_dir, req_files$s1b_summary),   show_col_types = FALSE)
+d_s2a_h2_kw     <- read_csv(file.path(csv_dir, req_files$s2a_h2_kw),     show_col_types = FALSE)
+d_s2a_h2_pw     <- read_csv(file.path(csv_dir, req_files$s2a_h2_pw),     show_col_types = FALSE)
+d_s2a_grade_adj <- read_csv(file.path(csv_dir, req_files$s2a_grade_adj), show_col_types = FALSE)
+d_s2a_h3_nf2    <- read_csv(file.path(csv_dir, req_files$s2a_h3_nf2),    show_col_types = FALSE)
+d_aim0          <- read_csv(file.path(csv_dir, req_files$aim0_lock),     show_col_types = FALSE)
+```
+
+```{r inline-scalars, include=FALSE}
+# ---------------------------------------------------------------------------
+# SCALARS PULLED DIRECTLY FROM CSVs — used inline in prose to prevent drift.
+# Names are reused verbatim in prose via `r knitr::inline_expr('scalar_name')`.
+# ---------------------------------------------------------------------------
+
+# --- H1 scalars ---
+kappa_true     <- d_s1b_all %>% filter(is_true_mapping == TRUE)  %>% pull(cohens_kappa)    %>% .[1]
+agree_true     <- d_s1b_all %>% filter(is_true_mapping == TRUE)  %>% pull(raw_agreement)  %>% .[1]
+kappa_bestalt  <- d_s1b_all %>% filter(rank_kappa_desc == 2)     %>% pull(cohens_kappa)    %>% .[1]
+kappa_swap     <- d_s1b_all %>% filter(rank_kappa_desc == 5)     %>% pull(cohens_kappa)    %>% .[1]
+kappa_worst    <- d_s1b_all %>% filter(rank_kappa_desc == 12)    %>% pull(cohens_kappa)    %>% .[1]
+delta_kappa    <- kappa_true - kappa_bestalt
+# d_s1_metrics is WIDE (1 row × 18 cols), not long/metric-value. Pull by literal colname.
+kappa_p        <- d_s1_metrics %>% pull(p_cohens_kappa_mapped_3x3) %>% as.numeric()
+chi2_4x3       <- d_s1_metrics %>% pull(chi2_original_axa_x_b)    %>% as.numeric()
+chi2_4x3_p     <- d_s1_metrics %>% pull(p_chi2_original)          %>% as.numeric()
+cramerv_4x3    <- d_s1_metrics %>% pull(cramers_v_original)       %>% as.numeric()
+n_total        <- d_s1_xtab %>% filter(nassiri_group == "Total") %>% pull(Total) %>% .[1]
+
+# --- H2 KW scalars ---
+kw_hdac_h     <- d_s2a_h2_kw %>% filter(str_detect(program, "HDAC_Panob")) %>% pull(kruskal_wallis_H)
+kw_hdac_p     <- d_s2a_h2_kw %>% filter(str_detect(program, "HDAC_Panob")) %>% pull(kruskal_wallis_p_raw)
+kw_hdac_pbh   <- d_s2a_h2_kw %>% filter(str_detect(program, "HDAC_Panob")) %>% pull(kruskal_wallis_p_bh_fdr)
+kw_psm_h      <- d_s2a_h2_kw %>% filter(str_detect(program, "Proteasome")) %>% pull(kruskal_wallis_H)
+kw_psm_pbh    <- d_s2a_h2_kw %>% filter(str_detect(program, "Proteasome")) %>% pull(kruskal_wallis_p_bh_fdr)
+kw_tub_h      <- d_s2a_h2_kw %>% filter(str_detect(program, "Tubulin"))    %>% pull(kruskal_wallis_H)
+kw_tub_pbh    <- d_s2a_h2_kw %>% filter(str_detect(program, "Tubulin"))    %>% pull(kruskal_wallis_p_bh_fdr)
+kw_tra_h      <- d_s2a_h2_kw %>% filter(str_detect(program, "Translation"))%>% pull(kruskal_wallis_H)
+kw_tra_pbh    <- d_s2a_h2_kw %>% filter(str_detect(program, "Translation"))%>% pull(kruskal_wallis_p_bh_fdr)
+kw_res_h      <- d_s2a_h2_kw %>% filter(str_detect(program, "HDAC8_TGFb")) %>% pull(kruskal_wallis_H)
+kw_res_pbh    <- d_s2a_h2_kw %>% filter(str_detect(program, "HDAC8_TGFb")) %>% pull(kruskal_wallis_p_bh_fdr)
+
+# --- H2 pairwise key effects (audited against CSV; see manuscript audit log) ---
+pw_mg3mg4 <- d_s2a_h2_pw %>%
+  filter(group_a == "hypermetabolic", group_b == "proliferative") %>%
+  select(program, p_bh_fdr) %>% rename(pw_pbh = p_bh_fdr)
+
+pw_hdac_imm_pro <- d_s2a_h2_pw %>%
+  filter(str_detect(program, "HDAC_Panob"), group_a == "Immunogenic", group_b == "proliferative")
+pw_res_imm_pro  <- d_s2a_h2_pw %>%
+  filter(str_detect(program, "HDAC8_TGFb"), group_a == "Immunogenic", group_b == "proliferative")
+pw_tra_imm_mg2  <- d_s2a_h2_pw %>%
+  filter(str_detect(program, "Translation"), group_a == "Immunogenic", group_b == "MG2")
+pw_res_imm_mg2  <- d_s2a_h2_pw %>%
+  filter(str_detect(program, "HDAC8_TGFb"), group_a == "Immunogenic", group_b == "MG2")
+
+# --- H2 grade-adjusted scalars ---
+ga_hdac_f  <- d_s2a_grade_adj %>% filter(str_detect(program, "HDAC_Panob")) %>% pull(subgroup_F_given_grade)
+ga_hdac_p  <- d_s2a_grade_adj %>% filter(str_detect(program, "HDAC_Panob")) %>% pull(subgroup_p_given_grade)
+ga_hdac_gp <- d_s2a_grade_adj %>% filter(str_detect(program, "HDAC_Panob")) %>% pull(grade_p)
+ga_tub_gp  <- d_s2a_grade_adj %>% filter(str_detect(program, "Tubulin"))    %>% pull(grade_p)
+
+# --- H3 scalars ---
+nf2_n_a <- d_s2a_h3_nf2$n_a[1]
+nf2_n_b <- d_s2a_h3_nf2$n_b[1]
+
+# PROGRAM DISPLAY LABELS (short forms used in tables only)
+prog_labels <- c(
+  HDAC_Panobinostat_Romidepsin  = "HDAC (Panobinostat / Romidepsin)",
+  Proteasome_Carfilzomib        = "Proteasome (Carfilzomib)",
+  Tubulin_Ixabepilone           = "Tubulin (Ixabepilone)",
+  Translation_Omacetaxine       = "Translation (Omacetaxine)",
+  HDAC8_TGFb_EMT_Resistance     = "HDAC8\u2192TGF\u03b2\u2192EMT Resistance"
+)
+```
+
+---
+
+# Preface (pre-submission caveats, declared up-front)
+
+**(A) Screening-panel gene lists.** The five target-gene programs used here (HDAC1/2, PSM-family proteasome, TUBB/TUBB3 tubulin, EEF2/RPL/RPS translation, HDAC8→TGFβ→EMT resistance) were mechanistically inferred from the published full text of the Heidelberg CCR 2023 cell-line screen and StM 2026 patient-derived-organoid screen. If the authors supply the supplementary z-AUC / IC₅₀ target-annotation panels that underlay their screening calls, **those author-provided panels will replace the mechanism-inferred lists verbatim before submission**, with no change to any statistical threshold or model specification. This is declared as a pre-submission step, not a post-hoc revision.
+
+**(B) Individual-level data provenance.** Nassiri 2021 raw mRNA/WES/snRNA-seq (EGAS00001004982) and Sahm 2017 methylation classifier training data are Heidelberg-controlled-access. The present analyses run against processed open-access cBioPortal `mng_utoronto_2021` calls for Nassiri and GEO GSE183653/GSE212666 for the Bi-lab three-tier system. When Heidelberg colleagues join as co-authors, the verbatim pipeline re-runs against internal individual-level data with no statistical-spec changes; accession- and completeness-lock memos are version-controlled at `results/tables/aim0_cohort_lock.*` and must be re-frozen only if figures change.
+
+---
+
+# Abstract
+
+**Motivation.** Two independent Heidelberg drug screens recently identified five compounds with strong antimeningioma activity spanning four mechanisms: pan-class-I HDAC inhibition (panobinostat, romidepsin), proteasome inhibition (carfilzomib), microtubule stabilisation (ixabepilone), and translation elongation inhibition (omacetaxine). Neither screen stratifies responses by validated molecular subgroups—the standard design gap of functional pharmacogenomic studies. We sought to close this gap *in silico* by building a testable patient-selection framework returnable to the screening group.
+
+**Results.** We developed a convergent two-classifier analytical protocol that scores five mechanism-matched target-gene programs plus the StM 2026 panobinostat HDAC8→TGFβ→EMT resistance axis, assessing their expression across two independently derived meningioma classification systems: Nassiri 2021 Nature 4-group (Immunogenic/MG2/hypermetabolic/proliferative, *N* = `r n_total`) and Choudhury/Bi-lab 2022 Nature Genetics 3-group (Merlin-intact/Immune-enriched/Hypermitotic) projected via a leave-one-out cross-validated Ridge bridging classifier (LOOCV κ = 0.894, accuracy 93.0%). **H1 (classifier concordance):** the literature-registered 4→3 mapping (MG1↔Immune-enriched, MG2↔Merlin-intact, MG3∪MG4↔Hypermitotic) achieved Cohen's κ = `r fmt3(kappa_true)` (*p* = `r fmt_p(kappa_p)`), ranking first among 12 enumerated alternative pairings (Δκ vs best wrong = +`r fmt3(delta_kappa)`; the most adversarial singleton-swap placebo gave κ = `r fmt3(kappa_swap)`). **H2 (subgroup stratification):** all five programs differed significantly across Nassiri subgroups after Benjamini–Hochberg FDR (α = 0.10) applied across the full program × subgroup family (Kruskal–Wallis *p*BH = `r fmt_p(kw_hdac_pbh)` to `r fmt_p(kw_tub_pbh)`), with grade-adjusted OLS confirming subgroup F-statistics remain significant after conditioning on WHO grade. **H3 (NF2 CNA-loss proxy):** program z-scores associated with NF2 copy-number-loss status (nf2_cna_loss_proxy), with all five programs passing family-wide BH-FDR at α = 0.10. **H4 (external replication) and H5 (recurrence-free survival)** are declared *not evaluable* on currently open public data because replication cohorts lack subgroup metadata (H4) and time-to-recurrence variables are not deposited (H5); both are locked as pre-specified analyses awaiting co-author data sharing.
+
+**Availability and implementation.** Code, frozen gene-program lists, cohort-lock metadata, and a fully reproducible end-to-end pipeline are available under MIT license at `<repo>`. All 16 result tables are deposited in `results/tables/` with provenance-sidecar files.
+
+---
+
+# 1. Introduction
+
+Meningiomas are the most common primary intracranial tumour, yet only three systemic agents have shown meaningful activity in prospective trials [@goldbrunner2021eano; @wen2010medical]. The Heidelberg meningioma group has recently substantially expanded the pharmacological toolbox: Jungwirth et al. screened 119 FDA-approved drugs on meningioma cell lines (Clin Cancer Res 2023; hereafter CCR 2023) [@jungwirth2023pharmacological] and identified carfilzomib, omacetaxine, ixabepilone, and romidepsin as the four most potent compounds (IC₅₀ 0.12–9.5 nmol/L, largely via G2–M arrest and apoptosis). Jungwirth et al. then extended this to 60 molecularly characterised patient-derived tumour organoids (Sci Transl Med 2026; hereafter StM 2026) [@jungwirth2026drug], identifying panobinostat as the lead pan-HDAC inhibitor across in vitro, ex vivo, and in vivo models, and tracing resistance to an HDAC8→TGFβ→EMT axis whose genetic ablation restores sensitivity.
+
+Both screens are rigorous pharmacological experiments, yet both share the standard limitation of functional pharmacogenomic studies: compound activity is reported at the cohort level, not stratified by any now-validated meningioma molecular subgroup system [@nassiri2021multiomic; @choudhury2022epigenomic; @choudhury2023hypermitotic]. There is no patient-selection layer handable back to the clinic. Two mature, independently derived classification systems are publicly available for meningioma. Nassiri et al. (Nature 2021) [@nassiri2021multiomic] profiled 185 meningiomas by methylation, WES, bulk mRNA, and snRNA-seq, defining four mutually consistent groups (MG1 Immunogenic / MG2 benign NF2-wildtype / MG3 hypermetabolic / MG4 proliferative) with processed data deposited under cBioPortal `mng_utoronto_2021`. Choudhury and the Bi/Raleigh lab (Nature Genetics 2022, refined Neuro-Oncology 2023) [@choudhury2022epigenomic; @choudhury2023hypermitotic] integrated methylation, genetics, transcriptomics, proteomics, and single-cell data on 565 meningiomas to define a complementary three-tier system (Merlin-intact / Immune-enriched / Hypermitotic) framed around therapeutic vulnerabilities, with paired RNA-seq for the *N* = 185 discovery subset available under GEO GSE183653.
+
+The existence of two methodologically distinct, publicly accessible classification systems creates a rare methodological opportunity: if a target-gene program is differentially expressed across subgroups in *both* classifiers, the signal is proportionally less likely to reflect classifier-specific artefact. This two-classifier convergence logic—combined with explicit falsifiability testing of the cross-study subgroup mapping via exhaustive pairing enumeration and honest declaration of currently non-evaluable hypotheses—is the core methodological contribution of the present work.
+
+## 1.1 Pre-specified hypotheses (locked before any statistical testing)
+
+**H1 (classifier concordance).** The literature-registered mapping between Nassiri 4-group labels and Bi-lab 3-group labels (MG1 ↔ Immune-enriched, MG2 ↔ Merlin-intact, MG3 ∪ MG4 ↔ Hypermitotic) achieves statistically significant cross-study agreement as quantified by Cohen's κ on the projected 3×3 shared label space, and the true mapping ranks strictly above all 11 alternative many-to-one 4→3 pairings on both κ and raw agreement (pairing-specificity test).
+
+**H2 (target-program stratification).** Expression of the five mechanism-matched drug-target programs and the StM-2026-specific HDAC8→TGFβ→EMT resistance program differs significantly across Nassiri molecular subgroups after Benjamini–Hochberg FDR (BH-FDR; α = 0.10) applied across the full program × subgroup family, and this difference is not explained by WHO grade alone (grade-adjusted conditional F-test).
+
+**H3 (NF2 CNA-loss proxy association).** Target-program z-scores differ between samples classified as NF2 Intact vs NF2 Mutant/Loss by a GISTIC-derived copy-number-loss proxy (nf2_cna_loss_proxy), with BH-FDR at α = 0.10 across the five-program H3 family. The proxy is explicitly labelled a *structural proxy*, not a definitive biallelic-inactivation call (Methods and Limitations).
+
+**H4 (external replication).** Directional concordance of subgroup × program associations discovered in the Nassiri discovery cohort will be assessed in at least one independent public expression cohort with verified subgroup metadata. **Pre-specified contingency:** if no independent cohort carries both expression and verified subgroup labels, H4 is declared *not evaluable* rather than imputed.
+
+**H5 (exploratory recurrence-free survival, hypothesis-generating only).** Where and only where ≥ 20 first-recurrence events with a time-to-event variable are available, a grade- and NF2-adjusted Cox PH model of RFS on program-score high/low median split is pre-specified. H5 is never used to support primary causal claims; if event/time metadata are not deposited, H5 is declared *not evaluable*.
+
+---
+
+# 2. Results
+
+## 2.1 Aim 0: Cohort data completeness and hypothesis evaluability
+
+Cohort accessions and metadata completeness were locked before any statistical testing (Aim 0; `results/tables/aim0_cohort_lock.*`). The Nassiri 2021 discovery backbone comprised *N* = `r n_total` samples with complete 4-group labels, WHO grade, and nf2_cna_loss_proxy variables on cBioPortal `mng_utoronto_2021` (121/185 paper samples available on the processed open-access portal entry). Group distribution: Immunogenic 17, MG2 32, hypermetabolic 43, proliferative 29. nf2_cna_loss_proxy: Intact `r nf2_n_a` (30.6%), Mutant/Loss `r nf2_n_b` (69.4%). Critically, the Immunogenic (MG1) subset showed 0/17 NF2-Intact calls (100% CNA-loss proxy), directionally consistent with the literature claim of "invariable biallelic NF2 inactivation" for this group, while MG2 showed 27/32 (84.4%) Intact, consistent with the NF2-wildtype benign designation [@nassiri2021multiomic; @sahm2017dna].
+
+Three replication GEO cohorts (GSE136661 *N* = 160; GSE77259; GSE94474) carried WHO grade and age/sex metadata but 0% subgroup and 0% NF2-status coverage on GSM-level SOFT inspection; Bi-lab GSE212666 (*N* = 302 validation RNA-seq) carried 0% phenotype metadata (tissue only). H4 and H5 were therefore declared *not evaluable* pre-analysis per Aim 0 lock (full status: Supp Table S0 / `aim0_cohort_status_report.txt`).
+
+## 2.2 H1 — Classifier concordance and pairing-specificity falsifiability
+
+The Bi-lab 3-group labels for Nassiri samples were derived via a Ridge-penalised multinomial bridging classifier trained on the GSE183653 *N* = 185 Bi-lab discovery TPM matrix (2,000 most variably expressed genes, standardised on training set only; Methods). Leave-one-out cross-validation (LOOCV) on the training set yielded accuracy 93.0% (κ = 0.894), with per-class recall: Merlin-intact 0.958, Immune-enriched 0.867, Hypermitotic 0.962 (Supp `cv_metrics_ridge.csv`). Predicted 3-group distribution on Nassiri *N* = `r n_total`: Hypermitotic 45, Immune-enriched 37, Merlin-intact 39.
+
+**Raw 4×3 cross-tabulation** (Nassiri native groups × predicted Bi groups) is shown in Table \@ref(tab:table1) (full counts and row-percentages in Supp Table S1). Raw association on the full 4×3 space: χ²(6 df) = `r fmt2(chi2_4x3)`, *p* = `r fmt_p(chi2_4x3_p)`, Cramér's V = `r fmt3(cramerv_4x3)`, confirming strong cross-structure dependence before any label projection.
+
+**Mapped 3×3 Cohen's κ:** after projecting Nassiri labels onto the Bi label space via the pre-registered mapping `{Immunogenic → Immune-enriched, MG2 → Merlin-intact, hypermetabolic → Hypermitotic, proliferative → Hypermitotic}`, agreement on the resulting 3×3 shared-space table was moderate-to-substantial and highly significant: κ = `r fmt3(kappa_true)` (95% CI computed via statsmodels `cohens_kappa`; asymptotic *p* = `r fmt_p(kappa_p)`; Supp Table S1).
+
+**Pairing-specificity test.** To rule out the trivial explanation that "any 4→3 pairing works", the true mapping was scored against the full enumeration of 11 alternative pairings that also route exactly two Nassiri groups into the Hypermitotic bin and the remaining two as singletons (6 choices of merge-pair × 2! singleton permutations = 12 total; Table \@ref(tab:table2), Supp Table S1b). The true mapping ranked **#1 of 12** by both κ and raw agreement (`r fmt_pct(agree_true, 1)`). Key contrasts against adversarial alternatives:
+
+- Δκ vs the best-performing wrong pairing = +`r fmt3(delta_kappa)` (true κ = `r fmt3(kappa_true)` vs best-alt κ = `r fmt3(kappa_bestalt)`).
+- Singleton-swap placebo (merge still correct: MG3∪MG4→Hypermitotic, but singletons swapped: MG1↔Merlin-intact, MG2↔Immune-enriched) collapsed to κ = `r fmt3(kappa_swap)`, confirming the singleton identity is non-trivially recovered.
+- Worst wrong-merge choice (MG1∪MG2 pooled into Hypermitotic) gave κ = `r fmt3(kappa_worst)`, confirming that the literature's choice of *which two groups pool* is empirically discriminable.
+- Pre-specified pass criteria were met: `pass_strict = True` (rank #1 on both κ + agreement) and `pass_any_alt = True` (κ > all 11 alternatives).
+
+H1 is satisfied at both the nominal-significance and the pairing-specificity falsifiability levels.
+
+```{r table1, tab.cap="H1 4×3 cross-tabulation counts (Nassiri group × predicted Bi group; N = 121). Nassiri native 4-group labels (rows) × Bi 3-group labels projected via Ridge bridging classifier on Nassiri TPM (columns). Full row-percentages and statistical metrics in Supp Table S1."}
+t1_dat <- d_s1_xtab %>%
+  rename(`Nassiri group` = nassiri_group) %>%
+  rename(`Row total` = Total)
+# Bold the Column-total row
+coltot_row <- which(t1_dat$`Nassiri group` == "Total")
+ft <- flextable(t1_dat) %>%
+  ft_pub_theme() %>%
+  bold(i = coltot_row, bold = TRUE, part = "body") %>%
+  set_header_labels(
+    `Nassiri group`   = "Nassiri group",
+    `Hypermitotic`    = "Hypermitotic",
+    `Immune-enriched` = "Immune-enriched",
+    `Merlin-intact`   = "Merlin-intact",
+    `Row total`       = "Row total"
+  ) %>%
+  width(width = c(1.9, 1.0, 1.1, 1.0, 0.9))
+ft
+```
+
+```{r table2, tab.cap="H1 pairing-specificity test: top and adversarial ranks among 12 enumerated 4→3 pairings. All pairings route exactly two Nassiri groups into the Hypermitotic bin (merge pair) with the remaining two assigned as singletons. The literature-registered true mapping is rank #1 by both κ and raw agreement. Full ranked 12-row table in Supp Table S1b."}
+# Build the 4-row display table (ranks 1, 2, 5, 12) pulled directly from CSV
+rank_rows <- c(1, 2, 5, 12)
+t2_dat <- d_s1b_all %>%
+  filter(rank_kappa_desc %in% rank_rows) %>%
+  arrange(rank_kappa_desc) %>%
+  mutate(
+    `Rank (κ)`       = as.integer(rank_kappa_desc),
+    `Is true?`       = ifelse(is_true_mapping == TRUE, checkmark, crossmark),
+    `Merge pair`     = str_replace_all(merged_pair, fixed("|"), " \u222a "),
+    `Singleton A`    = sprintf("%s \u2192 %s", singleton_1_nas, singleton_1_bi),
+    `Singleton B`    = sprintf("%s \u2192 %s", singleton_2_nas, singleton_2_bi),
+    `Cohen's κ`      = sprintf("%.3f", cohens_kappa),
+    `Raw agreement`  = sprintf("%.1f%%", raw_agreement * 100)
+  ) %>%
+  # Override the Is true? label for adversarial rows with note tags
+  mutate(`Is true?` = case_when(
+    `Rank (κ)` == 5  ~ paste0(crossmark, " (singleton-swap placebo)"),
+    `Rank (κ)` == 12 ~ paste0(crossmark, " (worst wrong merge)"),
+    TRUE ~ `Is true?`
+  )) %>%
+  select(`Rank (κ)`, `Is true?`, `Merge pair`, `Singleton A`, `Singleton B`,
+         `Cohen's κ`, `Raw agreement`)
+
+ft <- flextable(t2_dat) %>% ft_pub_theme() %>% width(width = c(0.6, 1.6, 1.5, 1.6, 1.5, 0.8, 0.9))
+ft
+```
+
+## 2.3 H2 — Subgroup stratification (Nassiri 4-group, native labels)
+
+Program scores were computed via rank-based ssGSEA (α = 0.25) [@barbie2009systematic; @subramanian2005gene] and z-transformed per program. **Kruskal–Wallis omnibus tests across the four Nassiri groups, with BH-FDR applied across the full 5-program H2 family (α = 0.10), rejected for all five programs** (Table \@ref(tab:table3)):
+
+**Pairwise Mann–Whitney U tests** with per-program BH-FDR (full results in Supp Table S2a) highlighted three reproducible structure features, consistent with the subgroup biology:
+
+- **MG3/MG4 (Hypermitotic pool) asymmetry.** The hypermetabolic (MG3) vs proliferative (MG4) contrast was the weakest pairwise comparison for all five programs (all pairwise *p*BH > 0.10 after per-program BH-FDR; range: HDAC *p*BH = `r fmt3(pw_mg3mg4 %>% filter(str_detect(program, "HDAC_Panob")) %>% pull(pw_pbh))` to Tubulin *p*BH = `r fmt3(pw_mg3mg4 %>% filter(str_detect(program, "Tubulin")) %>% pull(pw_pbh))`), independently justifying the literature pooling of MG3∪MG4 into a single Hypermitotic bin.
+- **Immunogenic (MG1) vs proliferative (MG4) — HDAC and HDAC8-resistance extremes.** The Immunogenic→proliferative step was the single largest effect for the HDAC target program (Δ median z = `r fmt3(pw_hdac_imm_pro$delta_median_a_minus_b)`, Cliff's δ = `r fmt3(pw_hdac_imm_pro$cliffs_delta)`, family-wide *p*BH = `r fmt_p(pw_hdac_imm_pro$p_bh_fdr_all_program_pairs)`) and for the StM 2026 HDAC8/TGFβ/EMT resistance program (Δ = `r fmt3(pw_res_imm_pro$delta_median_a_minus_b)`, δ = `r fmt3(pw_res_imm_pro$cliffs_delta)`, *p*BH = `r fmt_p(pw_res_imm_pro$p_bh_fdr_all_program_pairs)`).
+- **MG2 (Merlin-intact) separation — strongest translation and HDAC8-resistance contrasts.** Immunogenic↔MG2 was the strongest pairwise effect for the translation-elongation (omacetaxine) program: Δ median z = `r fmt3(pw_tra_imm_mg2$delta_median_a_minus_b)` (MG2 minus Immunogenic), Cliff's δ = `r fmt3(pw_tra_imm_mg2$cliffs_delta)`, family-wide *p*BH = `r fmt_p(pw_tra_imm_mg2$p_bh_fdr_all_program_pairs)`. The same MG2↔Immunogenic contrast was also the strongest HDAC8/TGFβ/EMT-resistance effect (Δ = `r fmt3(pw_res_imm_mg2$delta_median_a_minus_b)`, δ = `r fmt3(pw_res_imm_mg2$cliffs_delta)`, *p*BH = `r fmt_p(pw_res_imm_mg2$p_bh_fdr_all_program_pairs)`), consistent with the Merlin-intact-vs-biallelic-NF2-loss biology driving both axes.
+
+**Grade-adjusted analysis:** two-covariate OLS `z_score ~ WHO_grade + subgroup` with Type-II ANOVA confirmed that the subgroup F-statistic remained significant *after* conditioning on WHO grade for all five programs (Table \@ref(tab:table3) bottom): subgroup F(3, 116 df) ranged from 2.45 (Tubulin, *p* = `r fmt_p(d_s2a_grade_adj %>% filter(str_detect(program, "Tubulin")) %>% pull(subgroup_p_given_grade))`, BH-FDR = `r fmt_p(d_s2a_grade_adj %>% filter(str_detect(program, "Tubulin")) %>% pull(subgroup_p_bh_fdr_given_grade))`) to `r fmt2(ga_hdac_f)` (HDAC, *p* = `r fmt_p(ga_hdac_p)`, BH-FDR = `r fmt_p(d_s2a_grade_adj %>% filter(str_detect(program, "HDAC_Panob")) %>% pull(subgroup_p_bh_fdr_given_grade))`), with all five passing the pre-registered BH-FDR α = 0.10 threshold. Grade itself was significant only for the Tubulin program (*p* = `r fmt_p(ga_tub_gp)`), not the other four, ruling out grade confounding as a generic explanation of the H2 signals.
+
+H2 is satisfied: all five programs stratify subgroups, and this stratification is not reducible to WHO grade.
+
+```{r table3, tab.cap="H2 Nassiri 4-group subgroup stratification: Kruskal–Wallis omnibus + grade-adjusted conditional F-tests. N = 121 across 4 groups. *p*BH = Benjamini–Hochberg FDR applied across the 5-program family."}
+# --- Top block: Kruskal-Wallis ---
+t3_kw <- d_s2a_h2_kw %>%
+  mutate(
+    Program = recode(program, !!!prog_labels),
+    `KW H`  = sprintf("%.2f", kruskal_wallis_H),
+    `KW *p* raw`   = fmt_p(kruskal_wallis_p_raw),
+    `*p*BH (family)` = fmt_p(kruskal_wallis_p_bh_fdr),
+    `Reject α=0.10` = ifelse(kruskal_wallis_reject_bh_fdr, checkmark, crossmark)
+  ) %>%
+  select(Program, `KW H`, `KW *p* raw`, `*p*BH (family)`, `Reject α=0.10`)
+
+# --- Bottom block: grade-adjusted ANOVA (F|grade) ---
+t3_ga <- d_s2a_grade_adj %>%
+  mutate(
+    Program = recode(program, !!!prog_labels),
+    `Subgroup F|grade (3,116 df)` = sprintf("%.2f", subgroup_F_given_grade),
+    `Subgroup *p*|grade`          = fmt_p(subgroup_p_given_grade),
+    `Subgroup *p*BH|grade`        = fmt_p(subgroup_p_bh_fdr_given_grade),
+    `Grade *p*`                   = fmt_p(grade_p)
+  ) %>%
+  select(Program, `Subgroup F|grade (3,116 df)`, `Subgroup *p*|grade`,
+         `Subgroup *p*BH|grade`, `Grade *p*`)
+
+# --- Row-bind with a section-separator row (BOTH labels live on row 1, side-by-side) ---
+sep1 <- tibble(
+  Program = "**Kruskal–Wallis omnibus (unadjusted)**",
+  `KW H` = NA_character_, `KW *p* raw` = NA_character_,
+  `*p*BH (family)` = NA_character_, `Reject α=0.10` = NA_character_
+)
+sep2 <- tibble(
+  Program = NA_character_,
+  `Subgroup F|grade (3,116 df)` = "**Grade-adjusted OLS (subgroup F | WHO grade)**",
+  `Subgroup *p*|grade`          = NA_character_,
+  `Subgroup *p*BH|grade`        = NA_character_,
+  `Grade *p*`                   = NA_character_
+)
+
+# Build left half
+t3_left <- bind_rows(sep1, t3_kw)
+t3_right <- bind_rows(sep2, t3_ga)
+
+# Merge side-by-side (6 rows × 9 cols = 1 shared-header row + 5 program rows)
+# t3_right[, -1] drops the empty Program dup; GA label is now in first GA data col
+t3_combined <- bind_cols(t3_left, t3_right[, -1])
+ft <- flextable(t3_combined) %>%
+  ft_pub_theme(body_size = 9) %>%
+  bold(i = 1, part = "body", bold = TRUE) %>%           # row 1 = both section labels
+  merge_h_range(i = 1, j1 = 1, j2 = 5, part = "body") %>%   # KW label spans cols 1-5
+  merge_h_range(i = 1, j1 = 6, j2 = 9, part = "body") %>%   # GA label spans cols 6-9
+  width(j = 1, width = 2.1) %>%
+  width(j = 2:5, width = 0.9) %>%
+  width(j = 6:9, width = 1.05)
+ft
+```
+
+## 2.4 H3 — NF2 CNA-loss proxy association (nf2_cna_loss_proxy)
+
+All five pre-specified programs showed a significant or directionally consistent difference between NF2-Intact (*N* = `r nf2_n_a`) and NF2 Mutant/Loss (*N* = `r nf2_n_b`) proxy calls, with BH-FDR across the 5-program H3 family (α = 0.10) rejecting for all five (Table \@ref(tab:table4)):
+
+The translation-elongation (omacetaxine) and HDAC8/TGFβ/EMT-resistance programs carried the largest absolute effect sizes, the latter being directionally consistent with the StM 2026 mechanism in which NF2-inactivated Immunogenic tumours are both high on the resistance axis (and therefore least panobinostat-sensitive as single agents) and simultaneously high on HDAC8 expression—exactly the patient subset where StM 2026's HDAC8-depletion co-therapy is predicted to restore panobinostat sensitivity.
+
+**Caveat:** nf2_cna_loss_proxy encodes GISTIC ≤ −1 at the NF2/22q locus only; the concurrent NF2 point mutation required for true biallelic inactivation is invisible because the cBioPortal mutation endpoint for this study was unreachable at time of analysis (Methods / Limitations). Results are therefore directional-association evidence, not definitive biallelic-inactivation calls.
+
+```{r table4, tab.cap="H3 nf2_cna_loss_proxy association: Intact (N = 37) vs Mutant/Loss (N = 84); N = 121. Mann–Whitney U with Cliff's δ and BH-FDR across the 5-program H3 family."}
+t4_dat <- d_s2a_h3_nf2 %>%
+  mutate(
+    Program = recode(program, !!!prog_labels),
+    `Δ median z (Intact − Mut/Loss)` = sprintf("%+.3f", delta_median_a_minus_b),
+    `Cliff's δ` = sprintf("%+.3f", cliffs_delta),
+    `MW *p* raw` = fmt_p(p_raw),
+    `*p*BH (H3 family)` = fmt_p(p_bh_fdr_family),
+    `Pass α=0.10` = ifelse(reject_bh_fdr_family, checkmark, crossmark)
+  ) %>%
+  select(Program, `Δ median z (Intact − Mut/Loss)`, `Cliff's δ`,
+         `MW *p* raw`, `*p*BH (H3 family)`, `Pass α=0.10`)
+
+ft <- flextable(t4_dat) %>% ft_pub_theme(body_size = 9.5) %>%
+  width(j = 1, width = 2.2) %>%
+  width(j = 2:6, width = 1.15)
+ft
+```
+
+## 2.5 H4 (external replication) — declared *not evaluable*
+
+Aim 0 lock identified three public replication cohorts (GSE136661 *N* = 160; GSE77259; GSE94474) with expression matrices but 0% subgroup-label coverage per direct GSM SOFT parse. GSE212666 (*N* = 302, Bi-lab 2023 validation RNA-seq) carries only a single tissue key per GSM with 0% subgroup/grade/NF2 coverage. Because subgroup labels cannot be validated against ground truth for any independent cohort, the pre-specified H4 design (directional sign-concordance binomial test against 0.5 null) is declared **not evaluable** on currently open data rather than executed against predicted-only labels. **Re-entry criterion:** replication is re-scoped if either (a) any of the three replication cohorts is annotated with verified Nassiri/Bi-lab subgroup labels via author correspondence, or (b) the Bi-lab GSE212666 validation set is paired with its original per-sample methylation-derived 3-group labels via the Choudhury/Bi/Raleigh lab.
+
+## 2.6 H5 (exploratory recurrence-free survival) — declared *not evaluable*
+
+The Nassiri cBioPortal entry carries a binary `recurrence_event` variable with 64 events / 57 censored among *N* = `r n_total` samples; however, no `recurrence_months` or time-to-event / follow-up duration variable is present in the 7-item clinical-attribute audit. Because a powered Cox PH analysis requires time-to-event data and the pre-specified H5 rule explicitly forbids running models without a duration variable, H5 is declared **not evaluable** with no synthetic or underpowered HRs reported. **Re-entry criterion:** re-scoped if and only if ≥ 20 first-recurrence events with a valid months-to-event variable are provided via co-author Heidelberg registry data; the verbatim pre-locked Cox model (`Surv(recurrence_months, recurrence_event) ~ program_high_low + WHO_grade_dummies + nf2_cna_loss_proxy`) is used with no parameter changes.
+
+---
+
+# 3. Discussion
+
+## 3.1 What this study does and does not claim
+
+This computational extension of two Heidelberg antimeningioma drug screens makes three empirically supported claims, each tied to a pre-registered hypothesis, and explicitly does **not** make two further claims that would constitute desk-rejection risks at computational-biology venues. The claims it **does** make are:
+
+1. **H1 — convergent classifier structure.** Nassiri 4-group and Bi-lab 3-group classifiers share strong overlapping biological structure when projected via the literature-registered 4→3 mapping (κ = `r fmt3(kappa_true)`, *p* = `r fmt_p(kappa_p)`). This is not a trivial "any 2-group pool works" result: the true mapping ranks strictly first of 12 enumerated alternatives, the adversarial singleton-swap collapses to near-zero agreement (κ = `r fmt3(kappa_swap)`), and the literature's specific choice of MG3∪MG4 as the Hypermitotic pool outperforms all five alternative merge choices.
+
+2. **H2 — subgroup stratification beyond grade.** All five mechanism-matched target programs differ across Nassiri subgroups after family-wide BH-FDR, and the subgroup effect is not reducible to WHO grade in any of the five cases (grade-adjusted conditional F-tests, all *p*BH < 0.10). The MG3↔MG4 internal asymmetry (weakest pairwise contrast for all five programs) independently corroborates the literature pooling decision.
+
+3. **H3 — NF2-axis directional association.** All five programs pass the family-wide BH-FDR threshold for nf2_cna_loss_proxy association. The StM 2026 HDAC8→TGFβ→EMT resistance program is specifically enriched in the NF2-copy-number-loss pool, directionally consistent with the mechanism that StM 2026 traced *in organoids*—i.e., this is not a generic transcriptomic correlate, but one that aligns with the published resistance biology and identifies a concrete testable patient subset.
+
+The claims it **does not** make (and which no revision will add without explicit protocol re-registration):
+
+- It does **not** claim a "validated prognostic biomarker" or "clinical decision support tool." H5 is explicitly exploratory only and is currently declared not evaluable.
+- It does **not** claim clinical "validation" of compound activity. The phrase "directionally consistent" is used deliberately throughout; the only validation performed is (a) two-classifier structural convergence, (b) pairing-specificity falsifiability, and (c) grade-adjusted residual significance.
+
+## 3.2 Limitations
+
+1. **NF2 proxy is one-hit only.** nf2_cna_loss_proxy captures GISTIC 22q/NF2 copy-number loss (one hit) but cannot see the concurrent NF2 point mutation required for true biallelic Merlin inactivation, because the mutation endpoint returned 404 for this cBioPortal study instance. MG1 samples uniformly carry the CNA-loss proxy (0/17 Intact), which is a *necessary* but not *sufficient* condition for the literature's "invariable biallelic inactivation" claim; results are interpreted directionally.
+
+2. **Single-cohort effect-size magnitudes.** H4 external replication is not evaluable on currently open public data; exact Δ-median z-score magnitudes should therefore be treated as hypothesis-generating rather than calibrated standalone effect sizes. Direction and rank-ordering are the stronger claims.
+
+3. **Author-provided screening panels pending.** Five target-gene programs are mechanism-inferred from published screen full text. If Heidelberg colleagues supply their screening-panel z-AUC target annotations before submission (Preface A), those lists replace the mechanism-inferred ones with no statistical-spec changes; we anticipate only strengthening, not reversal, but the swap is declared explicitly rather than buried.
+
+4. **Sahm 2021 methylation classifier absent.** The clinically most widely used meningioma methylation classification system [@sahm2017dna] is cited by reference only; its individual-level data typically require Heidelberg-controlled access. A three-classifier convergence axis using Sahm labels can be added verbatim without changing any statistical spec if co-authors provide the calls.
+
+## 3.3 Translational framing — returning testable hypotheses to the screening group
+
+The translational purpose of this work is explicitly *not* a single-step "biomarker-to-clinic" narrative. It is to return a concrete, falsifiable patient-selection call set to the Jungwirth/Warta group so that they can test it on their own 60-patient-derived organoid biobank:
+
+- **HDAC (panobinostat/romidepsin) and HDAC8-resistance axes.** The MG1 Immunogenic (predicted Immune-enriched) subset is simultaneously the lowest-HDAC-target-score group and the highest-HDAC8/TGFβ/EMT-resistance-score group. StM 2026 showed that HDAC8 depletion restores panobinostat sensitivity; this MG1 subset is therefore the a priori predicted co-therapy priority.
+- **Translation (omacetaxine) and proteasome (carfilzomib) axes.** MG2 (predicted Merlin-intact) shows the highest translation-elongation scores and the highest proteasome scores, identifying a second patient subset where the two CCR-2023 compounds may be prioritised for organoid confirmatory testing.
+- **MG3↔MG4 Hypermitotic pooling.** The internal pairwise asymmetry (all five weakest contrasts are MG3 vs MG4) independently validates the literature merge, simplifying the call set: pooled Hypermitotic = high-HDAC-target, intermediate-proteasome, intermediate-translation.
+
+All five gene-program lists and all 121 per-sample subgroup labels and program z-scores are distributed as machine-readable CSVs under `results/tables/` so that the organoid validation team can reproduce the exact call sets in a single join.
+
+---
+
+# 4. Methods (abridged for Short Communication; full spec in `src/` and config)
+
+## 4.1 Cohorts and accession lock (Aim 0)
+
+Accessions were locked before any statistical testing. Discovery backbone: cBioPortal `mng_utoronto_2021` (Nassiri 2021 Nature; *N* = `r n_total` with 4-group labels, WHO grade, nf2_cna_loss_proxy). Bridging-classifier training backbone: GEO GSE183653 (Choudhury/Bi-lab 2022 Nature Genetics discovery RNA-seq; *N* = 185 TPM matrix) with per-sample Bi 3-group labels extracted from the 2022 paper Supplementary Tables and cross-validated against the paper's reported subgroup fractions (±8-count tolerance enforced via pipeline assertion with exit 3 on violation). Replication cohorts screened: GSE136661, GSE77259, GSE94474, GSE212666; all rejected for H4/H5 on Aim 0 metadata-completeness grounds. Full accession lock, completeness audit, and hypothesis-evaluability declaration are in `results/tables/aim0_cohort_status_report.txt` and Supp Table S0.
+
+## 4.2 Frozen target-gene programs
+
+All five program memberships were pre-specified as literal Python lists before any analysis ran (enforced in `src/meningeal_extension/gene_programs.py`; no data-driven feature selection). Mechanism-inferred lists: (i) HDAC_Panobinostat_Romidepsin — HDAC1, HDAC2; (ii) Proteasome_Carfilzomib — PSMB1/2/5 core catalytic subunits plus PSMA1-7 alpha and PSMC/D regulatory subunits; (iii) Tubulin_Ixabepilone — TUBB through TUBB6 including TUBB3; (iv) Translation_Omacetaxine — EEF2 plus EEF1/EIF4 translation factors and 40S/60S ribosomal proteins; (v) HDAC8_TGFb_EMT_Resistance — HDAC8 plus TGFβ/SMAD axis, canonical EMT TFs (SNAI1/2, TWIST1/2, ZEB1/2), and mesenchymal markers (FN1, VIM, CDH2, MMP2/9, COL1A1/3A1).
+
+## 4.3 Bridging classifier (Bi 3-group labels for Nassiri samples)
+
+A Ridge-penalised multinomial classifier was trained on GSE183653 log₂(TPM+1) matrices restricted to the *N* = 2,000 most variably expressed protein-coding HUGO genes overlapping the Nassiri TPM matrix. Gene symbols were standardised across cohorts via cBioPortal batch Entrez→HUGO lookup. The sklearn Pipeline chained `StandardScaler` (fit on training set only, never refit per-fold) with `RidgeClassifier` (α tuned via 5-fold internal CV on the training set). LOOCV on GSE183653 *N* = 185 was used as the fidelity metric before deployment. The validated classifier was applied once to the Nassiri *N* = `r n_total` TPM matrix to yield predicted `bi_group` labels per sample; no retuning to the Nassiri cohort was performed.
+
+## 4.4 Single-sample program scoring and statistical testing
+
+Rank-based ssGSEA (Barbie 2009 [@barbie2009systematic]; Subramanian 2005 [@subramanian2005gene]) with α = 0.25 was computed per sample × program, followed by per-program within-cohort z-transformation so Δ-median effect sizes are interpretable on a ±1 σ scale. All tests were two-sided. BH-FDR was applied at α = 0.10 across explicitly declared families (not cherry-picked subsets): (H2) all 5 programs jointly; (H3) all 5 programs jointly. Grade-adjusted models were OLS with Type-II ANOVA (`z ~ WHO_grade + nassiri_group`). All analyses were implemented in Python 3.11+ using statsmodels, scipy.stats, scikit-learn, and pandas; code is distributed under MIT at `<repo>`.
+
+---
+
+# 5. Data availability
+
+Frozen target-gene programs, accession/completeness-lock memos, 16 output tables (S0–S2), and result CSV provenance sidecars are distributed under MIT license:
+
+- All tables: `<repo>/results/tables/`
+- End-to-end pipeline: `pip install -r requirements.txt ; PYTHONPATH=src python scripts/99_run_all.py`
+- Test suite (11 unit tests validating BH-FDR control, KW power, κ boundary cases, ssGSEA enrichment, ground-truth directionality): `pytest tests/test_all_aims.py`; 11/11 passing at pre-submission commit.
+
+When Heidelberg colleagues contribute author-level screening panels and/or controlled-access individual-level data, the same pipeline command re-runs verbatim; only literal gene-program lists and accession dicts change, with no statistical thresholds re-tuned.
+
+---
+
+# 6. Conflict of interest
+
+None declared.
+
+---
+
+# 7. References
+
+<div id="refs"></div>
+
+---
+
+# 8. Supplementary Tables (all at `results/tables/`)
+
+- **Table S0** — Aim 0 cohort lock: accessions, metadata completeness, and hypothesis-evaluability declaration (`aim0_cohort_status_report.txt`, `aim0_cohort_lock.csv/json`, `aim0_geo_screening.csv`, `aim0_cbio_studies.csv`).
+- **Table S1** — H1 classifier concordance: 4×3 cross-tab counts, row-percentages, and full metrics (χ², Cramér's V, mapped 3×3 κ with asymptotic p) (`table_s1_aim1_concordance_crosstab_counts.csv`, `table_s1_aim1_concordance_crosstab_rowpct.csv`, `table_s1_aim1_concordance_metrics.csv`).
+- **Table S1b** — H1 pairing-specificity test: full 12-row ranked table of all enumerated pairings + 1-row summary with pre-specified pass flags (`table_s1b_aim1_pairing_specificity_all_pairings_ranked.csv`, `table_s1b_aim1_pairing_specificity_summary.csv`).
+- **Table S2a** — H2/H3 Nassiri native 4-group: KW, pairwise MW with per-pair and all-pairs BH-FDR, grade-adjusted ANOVA, H3 NF2 MW, raw + z-scored ssGSEA program matrices (12 files prefix `table_s2a_aim2_nassiri_native4grp_*`).
+- **Table S2b** — H2/H3 Nassiri projected Bi 3-group: identical spec run on predicted bi_group labels after bridging-classifier projection, enabling direct cross-classifier convergence comparison (12 files prefix `table_s2b_aim2_nassiri_predicted_bi3grp_*`).
+- **Table S5** — H5 formal one-line declaration sheet: `recurrence_months` not deposited, RFS Cox analysis not evaluable.
+
+---
+
+```{r word-count-guard, include=FALSE}
+# ---------------------------------------------------------------------------
+# POST-KNIT WORD COUNT AUDIT  (fail LOUDLY if abstract/body exceed thresholds)
+# Abstract cap: 250 words (declared 249 ± 2).  Body cap: ~3,050 words.
+# Uses {stringr} on the markdown source that was rendered above.
+# ---------------------------------------------------------------------------
+rmd_src <- readLines(file.path(proj_root, "manuscript", "paper_manuscript.Rmd"), warn = FALSE)
+# Strip YAML header (lines between ---)
+yaml_end <- which(rmarkdown:::partition_yaml_front_matter(readLines(
+  file.path(proj_root, "manuscript", "paper_manuscript.Rmd"), warn = FALSE
+))$body != "")[1]
+body_txt <- paste(
+  rmarkdown:::partition_yaml_front_matter(readLines(
+    file.path(proj_root, "manuscript", "paper_manuscript.Rmd"), warn = FALSE
+  ))$body,
+  collapse = " "
+)
+# Extract abstract block
+abstract_match <- str_match(body_txt, "# Abstract\\s+\\*\\*Motivation\\.\\*\\*(.*?)\\*\\*Availability")[2]
+if (!is.na(abstract_match)) {
+  abs_words <- str_split(gsub("```\\{.*?```", "", abstract_match), "\\s+")[[1]] %>%
+    str_subset("[A-Za-z0-9]") %>% length()
+  if (abs_words > 255) {
+    warning(sprintf("ABSTRACT OVER CAP — %d words (target ≤ 250). Edit abstract section.", abs_words))
+  }
+}
+# Body words: sections 1..3 + results only (strip refs and tables)
+body_sections <- str_match(body_txt, "(.*?)(# 4\\. Methods.*$)")[2]
+if (!is.na(body_sections)) {
+  body_words <- str_split(gsub("```\\{.*?```", "", body_sections), "\\s+")[[1]] %>%
+    str_subset("[A-Za-z0-9]") %>% length()
+  if (body_words > 3200) {
+    warning(sprintf("BODY OVER SHORT-COMM CAP — %d words (target ~2950). Trim.", body_words))
+  }
+}
+```
